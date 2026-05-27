@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +27,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         return expenseRepository.findByUserIdOrderByExpenseDateDesc(userId)
                 .stream()
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -89,17 +88,18 @@ public class ExpenseServiceImpl implements ExpenseService {
         return expenseRepository.findByUserIdAndCategory(userId, category)
                 .stream()
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public List<ExpenseResponse> getByMonth(String userId, int year, int month) {
         LocalDate start = LocalDate.of(year, month, 1);
         LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
         return expenseRepository.findByUserIdAndExpenseDateBetween(userId, start, end)
                 .stream()
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private ExpenseResponse toResponse(Expense expense) {

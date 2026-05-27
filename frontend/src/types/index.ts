@@ -13,6 +13,7 @@ export interface Expense {
   description: string;
   date: string;
   isRecurring: boolean;
+  recurringFrequency?: string;
   createdAt: string;
 }
 
@@ -41,6 +42,7 @@ export interface SavingsGoal {
   currentAmount: number;
   targetDate: string;
   status: 'ACTIVE' | 'COMPLETED' | 'PAUSED';
+  progressPercentage: number;
   createdAt: string;
 }
 
@@ -49,5 +51,26 @@ export interface AiInsight {
   type: 'WARNING' | 'SUGGESTION' | 'ACHIEVEMENT';
   title: string;
   message: string;
+  isRead: boolean;
   createdAt: string;
+}
+
+export interface SpendingOverview {
+  totalSpent: number;
+  totalBudget: number;
+  remainingBudget: number;
+  budgetUtilizationPercentage: number;
+  averageDailySpending: number;
+}
+
+export interface CategoryBreakdown {
+  category: string;
+  amount: number;
+  percentage: number;
+}
+
+export interface SpendingTrend {
+  month: string;
+  totalSpent: number;
+  budgetAmount: number;
 }
