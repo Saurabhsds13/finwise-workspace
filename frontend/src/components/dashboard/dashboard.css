@@ -1,0 +1,216 @@
+/* Dashboard Card */
+.dashboard-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.dashboard-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.empty-chart {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+/* Utilization Ring */
+.utilization-chart {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.utilization-ring {
+  position: relative;
+  width: 140px;
+  height: 140px;
+}
+
+.ring-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-value {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.ring-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.utilization-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.detail-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Category Bars */
+.category-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.category-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.category-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.category-bar-name {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.category-bar-amount {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.category-bar-track {
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.category-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.category-bar-percent {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Budget Overview List */
+.budget-overview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.budget-overview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.budget-overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.budget-overview-name {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.budget-overview-amounts {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.budget-overview-bar {
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.budget-overview-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Goals Overview List */
+.goals-overview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.goal-overview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.goal-overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.goal-overview-name {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.goal-overview-percent {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.goal-overview-bar {
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.goal-overview-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--primary);
+  transition: width 0.3s ease;
+}
+
+.goal-overview-amounts {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-secondary);
+}

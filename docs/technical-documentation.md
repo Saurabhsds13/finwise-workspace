@@ -18,8 +18,8 @@ FinWise is an AI-powered financial management platform designed to help users ta
 | Expense Tracking | ✅ Complete | Full CRUD with categorization and filtering |
 | Budget Planning | ✅ Complete | Period-based budgets with category allocations |
 | Savings Goals | ✅ Complete | Goal management with contribution tracking |
-| Dashboard & Analytics | 🔄 In Progress | Visual summaries and trend analysis |
-| AI Advisor | 🔄 Planned | Rule-based spending insights |
+| Dashboard & Analytics | ✅ Complete | Visual summaries, trends, category breakdowns |
+| AI Advisor | ✅ Complete | Rule-based spending pattern analysis and insights |
 
 ---
 
@@ -399,7 +399,7 @@ export JWT_SECRET=your-production-secret-at-least-32-bytes
 | Phase | Features | Timeline |
 |-------|----------|----------|
 | Phase 1 ✅ | Auth, Expenses, Budgets, Goals | Complete |
-| Phase 2 🔄 | Dashboard, Analytics, AI Advisor | In Progress |
+| Phase 2 ✅ | Dashboard, Analytics, AI Advisor | Complete |
 | Phase 3 | Notifications, Reports (PDF/CSV) | Planned |
 | Phase 4 | Bank Integration (Plaid/Open Banking) | Future |
 | Phase 5 | Mobile App (React Native) | Future |

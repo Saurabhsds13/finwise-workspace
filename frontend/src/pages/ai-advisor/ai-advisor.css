@@ -1,0 +1,91 @@
+.ai-advisor-page {
+  max-width: 800px;
+}
+
+.ai-advisor-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.ai-advisor-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.ai-advisor-intro {
+  margin-bottom: 24px;
+}
+
+.intro-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.intro-card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.intro-card p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.insight-types {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.type-badge {
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.type-badge.warning {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.type-badge.suggestion {
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.type-badge.achievement {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.ai-loading {
+  text-align: center;
+  padding: 48px;
+  color: var(--text-secondary);
+}
+
+.ai-empty {
+  text-align: center;
+  padding: 48px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.ai-empty p {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.ai-empty span {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
