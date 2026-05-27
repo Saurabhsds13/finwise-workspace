@@ -12,16 +12,16 @@ import java.util.List;
 
 @AllArgsConstructor
 @Getter
-public class UserPrincipal implements UserDetails {
+public class CustomUserDetails implements UserDetails {
 
-    private String id;
-    private String email;
-    private String password;
-    private String firstName;
-    private String lastName;
+    private final String id;
+    private final String email;
+    private final String password;
+    private final String firstName;
+    private final String lastName;
 
-    public static UserPrincipal from(User user) {
-        return new UserPrincipal(
+    public static CustomUserDetails fromUser(User user) {
+        return new CustomUserDetails(
                 user.getId(),
                 user.getEmail(),
                 user.getPassword(),
@@ -36,8 +36,13 @@ public class UserPrincipal implements UserDetails {
     }
 
     @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
     public String getUsername() {
-        return email;
+        return id;
     }
 
     @Override

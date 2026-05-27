@@ -2,14 +2,14 @@ package com.finwise.controller;
 
 import com.finwise.dto.expense.ExpenseRequest;
 import com.finwise.dto.expense.ExpenseResponse;
-import com.finwise.security.CurrentUser;
-import com.finwise.security.UserPrincipal;
+import com.finwise.security.SecurityUtils;
 import com.finwise.service.ExpenseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -20,8 +20,9 @@ public class ExpenseController {
     private final ExpenseService expenseService;
 
     @GetMapping
-    public ResponseEntity<List<ExpenseResponse>> getAll(@CurrentUser UserPrincipal user) {
-        return ResponseEntity.ok(expenseService.getAllByUser(user.getId()));
+    public ResponseEntity<List<ExpenseResponse>> getAll() {
+        String userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(expenseService.getAllByUser(userId));
     }
 
     @GetMapping("/{id}")
@@ -30,15 +31,13 @@ public class ExpenseController {
     }
 
     @PostMapping
-    public ResponseEntity<ExpenseResponse> create(@CurrentUser UserPrincipal user,
-                                                   @Valid @RequestBody ExpenseRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(expenseService.create(user.getId(), request));
+    public ResponseEntity<ExpenseResponse> create(@Valid @RequestBody ExpenseRequest request) {
+        String userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.status(HttpStatus.CREATED).body(expenseService.create(userId, request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ExpenseResponse> update(@PathVariable String id,
-                                                   @Valid @RequestBody ExpenseRequest request) {
+    public ResponseEntity<ExpenseResponse> update(@PathVariable String id, @Valid @RequestBody ExpenseRequest request) {
         return ResponseEntity.ok(expenseService.update(id, request));
     }
 
@@ -49,15 +48,14 @@ public class ExpenseController {
     }
 
     @GetMapping("/category/{category}")
-    public ResponseEntity<List<ExpenseResponse>> getByCategory(@CurrentUser UserPrincipal user,
-                                                                @PathVariable String category) {
-        return ResponseEntity.ok(expenseService.getByCategory(user.getId(), category));
+    public ResponseEntity<List<ExpenseResponse>> getByCategory(@PathVariable String category) {
+        String userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(expenseService.getByCategory(userId, category));
     }
 
     @GetMapping("/monthly/{year}/{month}")
-    public ResponseEntity<List<ExpenseResponse>> getByMonth(@CurrentUser UserPrincipal user,
-                                                             @PathVariable int year,
-                                                             @PathVariable int month) {
-        return ResponseEntity.ok(expenseService.getByMonth(user.getId(), year, month));
+    public ResponseEntity<List<ExpenseResponse>> getByMonth(@PathVariable int year, @PathVariable int month) {
+        String userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(expenseService.getByMonth(userId, year, month));
     }
 }

@@ -5,14 +5,12 @@ import com.finwise.dto.auth.LoginRequest;
 import com.finwise.dto.auth.RegisterRequest;
 import com.finwise.entity.RefreshToken;
 import com.finwise.entity.User;
-import com.finwise.exception.ResourceNotFoundException;
+import com.finwise.exception.AuthException;
 import com.finwise.repository.RefreshTokenRepository;
 import com.finwise.repository.UserRepository;
-import com.finwise.security.JwtTokenProvider;
+import com.finwise.security.JwtUtil;
 import com.finwise.service.AuthService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,29 +24,17 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final AuthenticationManager authenticationManager;
-
-    @Override
-    @Transactional
-    public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
-
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User", request.getEmail()));
-
-        return generateAuthResponse(user);
-    }
+    private final JwtUtil jwtUtil;
 
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
+        // Check if email already exists
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email already registered");
+            throw new AuthException("Email already registered");
         }
 
+        // Create new user
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -57,32 +43,65 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         user = userRepository.save(user);
-        return generateAuthResponse(user);
+
+        // Generate tokens
+        String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getId());
+
+        // Save refresh token
+        saveRefreshToken(user, refreshToken);
+
+        return buildAuthResponse(user, accessToken, refreshToken);
+    }
+
+    @Override
+    @Transactional
+    public AuthResponse login(LoginRequest request) {
+        // Find user by email
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new AuthException("Invalid email or password"));
+
+        // Verify password
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new AuthException("Invalid email or password");
+        }
+
+        // Generate tokens
+        String accessToken = jwtUtil.generateAccessToken(user.getId(), user.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(user.getId());
+
+        // Save refresh token (invalidate old ones)
+        refreshTokenRepository.deleteByUserId(user.getId());
+        saveRefreshToken(user, refreshToken);
+
+        return buildAuthResponse(user, accessToken, refreshToken);
     }
 
     @Override
     @Transactional
     public void logout(String token) {
+        // Remove "Bearer " prefix if present
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
         }
-        String userId = jwtTokenProvider.getUserIdFromToken(token);
-        refreshTokenRepository.deleteByUserId(userId);
+
+        if (token != null && jwtUtil.validateToken(token)) {
+            String userId = jwtUtil.getUserIdFromToken(token);
+            refreshTokenRepository.deleteByUserId(userId);
+        }
     }
 
-    private AuthResponse generateAuthResponse(User user) {
-        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail());
-        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
-
-        // Store refresh token in DB
-        RefreshToken refreshTokenEntity = RefreshToken.builder()
+    private void saveRefreshToken(User user, String token) {
+        RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
-                .token(refreshToken)
-                .expiresAt(LocalDateTime.now().plusSeconds(
-                        jwtTokenProvider.getRefreshTokenExpirationMs() / 1000))
+                .token(token)
+                .expiresAt(LocalDateTime.now().plusDays(7))
                 .build();
-        refreshTokenRepository.save(refreshTokenEntity);
 
+        refreshTokenRepository.save(refreshToken);
+    }
+
+    private AuthResponse buildAuthResponse(User user, String accessToken, String refreshToken) {
         return AuthResponse.builder()
                 .token(accessToken)
                 .refreshToken(refreshToken)

@@ -2,14 +2,14 @@ package com.finwise.controller;
 
 import com.finwise.dto.budget.BudgetRequest;
 import com.finwise.dto.budget.BudgetResponse;
-import com.finwise.security.CurrentUser;
-import com.finwise.security.UserPrincipal;
+import com.finwise.security.SecurityUtils;
 import com.finwise.service.BudgetService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -20,8 +20,9 @@ public class BudgetController {
     private final BudgetService budgetService;
 
     @GetMapping
-    public ResponseEntity<List<BudgetResponse>> getAll(@CurrentUser UserPrincipal user) {
-        return ResponseEntity.ok(budgetService.getAllByUser(user.getId()));
+    public ResponseEntity<List<BudgetResponse>> getAll() {
+        String userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(budgetService.getAllByUser(userId));
     }
 
     @GetMapping("/{id}")
@@ -30,15 +31,13 @@ public class BudgetController {
     }
 
     @PostMapping
-    public ResponseEntity<BudgetResponse> create(@CurrentUser UserPrincipal user,
-                                                  @Valid @RequestBody BudgetRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(budgetService.create(user.getId(), request));
+    public ResponseEntity<BudgetResponse> create(@Valid @RequestBody BudgetRequest request) {
+        String userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.status(HttpStatus.CREATED).body(budgetService.create(userId, request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BudgetResponse> update(@PathVariable String id,
-                                                  @Valid @RequestBody BudgetRequest request) {
+    public ResponseEntity<BudgetResponse> update(@PathVariable String id, @Valid @RequestBody BudgetRequest request) {
         return ResponseEntity.ok(budgetService.update(id, request));
     }
 
@@ -49,7 +48,8 @@ public class BudgetController {
     }
 
     @GetMapping("/active")
-    public ResponseEntity<List<BudgetResponse>> getActive(@CurrentUser UserPrincipal user) {
-        return ResponseEntity.ok(budgetService.getActiveBudgets(user.getId()));
+    public ResponseEntity<List<BudgetResponse>> getActive() {
+        String userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(budgetService.getActiveBudgets(userId));
     }
 }

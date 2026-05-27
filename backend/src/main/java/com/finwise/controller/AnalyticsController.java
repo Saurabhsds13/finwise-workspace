@@ -4,13 +4,13 @@ import com.finwise.dto.analytics.SpendingOverview;
 import com.finwise.dto.analytics.CategoryBreakdown;
 import com.finwise.dto.analytics.SpendingTrend;
 import com.finwise.entity.AiInsight;
-import com.finwise.security.CurrentUser;
-import com.finwise.security.UserPrincipal;
+import com.finwise.security.SecurityUtils;
 import com.finwise.service.AnalyticsService;
 import com.finwise.service.AiAdvisorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -22,30 +22,32 @@ public class AnalyticsController {
     private final AiAdvisorService aiAdvisorService;
 
     @GetMapping("/spending")
-    public ResponseEntity<SpendingOverview> getSpendingOverview(@CurrentUser UserPrincipal user,
-                                                                @RequestParam String period) {
-        return ResponseEntity.ok(analyticsService.getSpendingOverview(user.getId(), period));
+    public ResponseEntity<SpendingOverview> getSpendingOverview(@RequestParam String period) {
+        String userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(analyticsService.getSpendingOverview(userId, period));
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<List<CategoryBreakdown>> getCategoryBreakdown(@CurrentUser UserPrincipal user,
-                                                                         @RequestParam String period) {
-        return ResponseEntity.ok(analyticsService.getCategoryBreakdown(user.getId(), period));
+    public ResponseEntity<List<CategoryBreakdown>> getCategoryBreakdown(@RequestParam String period) {
+        String userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(analyticsService.getCategoryBreakdown(userId, period));
     }
 
     @GetMapping("/trends")
-    public ResponseEntity<List<SpendingTrend>> getTrends(@CurrentUser UserPrincipal user,
-                                                          @RequestParam(defaultValue = "6") int months) {
-        return ResponseEntity.ok(analyticsService.getSpendingTrends(user.getId(), months));
+    public ResponseEntity<List<SpendingTrend>> getTrends(@RequestParam(defaultValue = "6") int months) {
+        String userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(analyticsService.getSpendingTrends(userId, months));
     }
 
     @GetMapping("/ai-insights")
-    public ResponseEntity<List<AiInsight>> getAiInsights(@CurrentUser UserPrincipal user) {
-        return ResponseEntity.ok(aiAdvisorService.getInsights(user.getId()));
+    public ResponseEntity<List<AiInsight>> getAiInsights() {
+        String userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(aiAdvisorService.getInsights(userId));
     }
 
     @GetMapping("/ai-suggestions")
-    public ResponseEntity<List<AiInsight>> getAiSuggestions(@CurrentUser UserPrincipal user) {
-        return ResponseEntity.ok(aiAdvisorService.generateInsights(user.getId()));
+    public ResponseEntity<List<AiInsight>> getAiSuggestions() {
+        String userId = SecurityUtils.getCurrentUserId();
+        return ResponseEntity.ok(aiAdvisorService.generateInsights(userId));
     }
 }
