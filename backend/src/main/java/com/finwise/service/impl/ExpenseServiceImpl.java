@@ -5,112 +5,125 @@ import com.finwise.dto.expense.ExpenseResponse;
 import com.finwise.entity.Expense;
 import com.finwise.entity.User;
 import com.finwise.exception.ResourceNotFoundException;
+import com.finwise.mapper.ExpenseMapper;
 import com.finwise.repository.ExpenseRepository;
 import com.finwise.repository.UserRepository;
 import com.finwise.service.ExpenseService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Expense service implementation.
+ *
+ * SOLID principles applied:
+ * - SRP: Only handles expense business logic
+ * - OCP: New expense types can be added via strategy pattern
+ * - LSP: Implements ExpenseService contract faithfully
+ * - ISP: ExpenseService interface is focused on expense operations only
+ * - DIP: Depends on repository/mapper abstractions
+ */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExpenseServiceImpl implements ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final UserRepository userRepository;
+    private final ExpenseMapper expenseMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<ExpenseResponse> getAllByUser(String userId) {
+        log.debug("Fetching all expenses for user: {}", userId);
         return expenseRepository.findByUserIdOrderByExpenseDateDesc(userId)
                 .stream()
-                .map(this::toResponse)
+                .map(expenseMapper::toResponse)
                 .toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ExpenseResponse getById(String id) {
-        Expense expense = expenseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Expense", id));
-        return toResponse(expense);
+        log.debug("Fetching expense: {}", id);
+        Expense expense = findExpenseOrThrow(id);
+        return expenseMapper.toResponse(expense);
     }
 
     @Override
     @Transactional
     public ExpenseResponse create(String userId, ExpenseRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+        log.info("Creating expense for user: {} | category: {} | amount: {}", userId, request.getCategory(), request.getAmount());
 
-        Expense expense = Expense.builder()
-                .user(user)
-                .amount(request.getAmount())
-                .category(request.getCategory())
-                .description(request.getDescription())
-                .expenseDate(request.getDate())
-                .isRecurring(request.isRecurring())
-                .recurringFrequency(request.getRecurringFrequency())
-                .build();
-
+        User user = findUserOrThrow(userId);
+        Expense expense = expenseMapper.toEntity(request, user);
         expense = expenseRepository.save(expense);
-        return toResponse(expense);
+
+        log.info("Expense created: {}", expense.getId());
+        return expenseMapper.toResponse(expense);
     }
 
     @Override
     @Transactional
     public ExpenseResponse update(String id, ExpenseRequest request) {
-        Expense expense = expenseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Expense", id));
+        log.info("Updating expense: {}", id);
 
-        expense.setAmount(request.getAmount());
-        expense.setCategory(request.getCategory());
-        expense.setDescription(request.getDescription());
-        expense.setExpenseDate(request.getDate());
-        expense.setRecurring(request.isRecurring());
-        expense.setRecurringFrequency(request.getRecurringFrequency());
-
+        Expense expense = findExpenseOrThrow(id);
+        expenseMapper.updateEntity(expense, request);
         expense = expenseRepository.save(expense);
-        return toResponse(expense);
+
+        log.info("Expense updated: {}", id);
+        return expenseMapper.toResponse(expense);
     }
 
     @Override
     @Transactional
     public void delete(String id) {
+        log.info("Deleting expense: {}", id);
+
         if (!expenseRepository.existsById(id)) {
             throw new ResourceNotFoundException("Expense", id);
         }
         expenseRepository.deleteById(id);
+
+        log.info("Expense deleted: {}", id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ExpenseResponse> getByCategory(String userId, String category) {
+        log.debug("Fetching expenses for user: {} | category: {}", userId, category);
         return expenseRepository.findByUserIdAndCategory(userId, category)
                 .stream()
-                .map(this::toResponse)
+                .map(expenseMapper::toResponse)
                 .toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ExpenseResponse> getByMonth(String userId, int year, int month) {
+        log.debug("Fetching expenses for user: {} | period: {}-{}", userId, year, month);
+
         LocalDate start = LocalDate.of(year, month, 1);
         LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
 
         return expenseRepository.findByUserIdAndExpenseDateBetween(userId, start, end)
                 .stream()
-                .map(this::toResponse)
+                .map(expenseMapper::toResponse)
                 .toList();
     }
 
-    private ExpenseResponse toResponse(Expense expense) {
-        return ExpenseResponse.builder()
-                .id(expense.getId())
-                .amount(expense.getAmount())
-                .category(expense.getCategory())
-                .description(expense.getDescription())
-                .date(expense.getExpenseDate())
-                .isRecurring(expense.isRecurring())
-                .createdAt(expense.getCreatedAt())
-                .build();
+    private Expense findExpenseOrThrow(String id) {
+        return expenseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Expense", id));
+    }
+
+    private User findUserOrThrow(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
     }
 }

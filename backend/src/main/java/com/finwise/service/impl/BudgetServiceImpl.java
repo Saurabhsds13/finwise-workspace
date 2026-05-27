@@ -3,24 +3,33 @@ package com.finwise.service.impl;
 import com.finwise.dto.budget.BudgetRequest;
 import com.finwise.dto.budget.BudgetResponse;
 import com.finwise.entity.Budget;
-import com.finwise.entity.BudgetCategory;
 import com.finwise.entity.User;
 import com.finwise.exception.ResourceNotFoundException;
+import com.finwise.mapper.BudgetMapper;
 import com.finwise.repository.BudgetRepository;
 import com.finwise.repository.ExpenseRepository;
 import com.finwise.repository.UserRepository;
 import com.finwise.service.BudgetService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Budget service implementation.
+ *
+ * SOLID principles applied:
+ * - SRP: Only handles budget business logic
+ * - OCP: Budget period strategies can be extended without modification
+ * - DIP: Depends on repository/mapper abstractions
+ */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BudgetServiceImpl implements BudgetService {
@@ -28,130 +37,80 @@ public class BudgetServiceImpl implements BudgetService {
     private final BudgetRepository budgetRepository;
     private final ExpenseRepository expenseRepository;
     private final UserRepository userRepository;
+    private final BudgetMapper budgetMapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<BudgetResponse> getAllByUser(String userId) {
+        log.debug("Fetching all budgets for user: {}", userId);
         return budgetRepository.findByUserId(userId)
                 .stream()
-                .map(budget -> toResponse(budget, userId))
+                .map(budget -> toResponseWithSpending(budget, userId))
                 .toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BudgetResponse getById(String id) {
-        Budget budget = budgetRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Budget", id));
-        return toResponse(budget, budget.getUser().getId());
+        log.debug("Fetching budget: {}", id);
+        Budget budget = findBudgetOrThrow(id);
+        return toResponseWithSpending(budget, budget.getUser().getId());
     }
 
     @Override
     @Transactional
     public BudgetResponse create(String userId, BudgetRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+        log.info("Creating budget for user: {} | name: {} | amount: {}", userId, request.getName(), request.getTotalAmount());
 
-        Budget budget = Budget.builder()
-                .user(user)
-                .name(request.getName())
-                .totalAmount(request.getTotalAmount())
-                .period(Budget.BudgetPeriod.valueOf(request.getPeriod()))
-                .startDate(request.getStartDate())
-                .endDate(request.getEndDate())
-                .categories(new ArrayList<>())
-                .build();
-
-        // Add categories
-        if (request.getCategories() != null) {
-            for (BudgetRequest.CategoryAllocation catReq : request.getCategories()) {
-                BudgetCategory category = BudgetCategory.builder()
-                        .budget(budget)
-                        .name(catReq.getName())
-                        .allocatedAmount(catReq.getAllocatedAmount())
-                        .build();
-                budget.getCategories().add(category);
-            }
-        }
-
+        User user = findUserOrThrow(userId);
+        Budget budget = budgetMapper.toEntity(request, user);
         budget = budgetRepository.save(budget);
-        return toResponse(budget, userId);
+
+        log.info("Budget created: {}", budget.getId());
+        return toResponseWithSpending(budget, userId);
     }
 
     @Override
     @Transactional
     public BudgetResponse update(String id, BudgetRequest request) {
-        Budget budget = budgetRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Budget", id));
+        log.info("Updating budget: {}", id);
 
-        budget.setName(request.getName());
-        budget.setTotalAmount(request.getTotalAmount());
-        budget.setPeriod(Budget.BudgetPeriod.valueOf(request.getPeriod()));
-        budget.setStartDate(request.getStartDate());
-        budget.setEndDate(request.getEndDate());
-
-        // Update categories
-        budget.getCategories().clear();
-        if (request.getCategories() != null) {
-            for (BudgetRequest.CategoryAllocation catReq : request.getCategories()) {
-                BudgetCategory category = BudgetCategory.builder()
-                        .budget(budget)
-                        .name(catReq.getName())
-                        .allocatedAmount(catReq.getAllocatedAmount())
-                        .build();
-                budget.getCategories().add(category);
-            }
-        }
-
+        Budget budget = findBudgetOrThrow(id);
+        budgetMapper.updateEntity(budget, request);
         budget = budgetRepository.save(budget);
-        return toResponse(budget, budget.getUser().getId());
+
+        log.info("Budget updated: {}", id);
+        return toResponseWithSpending(budget, budget.getUser().getId());
     }
 
     @Override
     @Transactional
     public void delete(String id) {
+        log.info("Deleting budget: {}", id);
+
         if (!budgetRepository.existsById(id)) {
             throw new ResourceNotFoundException("Budget", id);
         }
         budgetRepository.deleteById(id);
+
+        log.info("Budget deleted: {}", id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BudgetResponse> getActiveBudgets(String userId) {
+        log.debug("Fetching active budgets for user: {}", userId);
         LocalDate today = LocalDate.now();
         return budgetRepository
                 .findByUserIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(userId, today, today)
                 .stream()
-                .map(budget -> toResponse(budget, userId))
+                .map(budget -> toResponseWithSpending(budget, userId))
                 .toList();
     }
 
-    private BudgetResponse toResponse(Budget budget, String userId) {
-        // Calculate spent amounts from expenses within budget period
+    private BudgetResponse toResponseWithSpending(Budget budget, String userId) {
         Map<String, BigDecimal> categorySpending = getCategorySpending(userId, budget.getStartDate(), budget.getEndDate());
-
-        BigDecimal totalSpent = categorySpending.values().stream()
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        List<BudgetResponse.CategoryResponse> categoryResponses = budget.getCategories() != null
-                ? budget.getCategories().stream()
-                    .map(cat -> BudgetResponse.CategoryResponse.builder()
-                            .id(cat.getId())
-                            .name(cat.getName())
-                            .allocatedAmount(cat.getAllocatedAmount())
-                            .spentAmount(categorySpending.getOrDefault(cat.getName(), BigDecimal.ZERO))
-                            .build())
-                    .toList()
-                : List.of();
-
-        return BudgetResponse.builder()
-                .id(budget.getId())
-                .name(budget.getName())
-                .totalAmount(budget.getTotalAmount())
-                .spentAmount(totalSpent)
-                .period(budget.getPeriod().name())
-                .startDate(budget.getStartDate())
-                .endDate(budget.getEndDate())
-                .categories(categoryResponses)
-                .build();
+        return budgetMapper.toResponse(budget, categorySpending);
     }
 
     private Map<String, BigDecimal> getCategorySpending(String userId, LocalDate start, LocalDate end) {
@@ -161,5 +120,15 @@ public class BudgetServiceImpl implements BudgetService {
                         row -> (String) row[0],
                         row -> (BigDecimal) row[1]
                 ));
+    }
+
+    private Budget findBudgetOrThrow(String id) {
+        return budgetRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Budget", id));
+    }
+
+    private User findUserOrThrow(String userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
     }
 }
