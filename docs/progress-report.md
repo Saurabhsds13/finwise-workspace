@@ -109,11 +109,13 @@ FinWise is an AI-powered financial management platform that enables users to tra
 ## How to Run Locally
 
 ```bash
-# 1. Setup PostgreSQL database
-createdb finwise
+# 1. Setup MySQL database
+mysql -u root -p
+CREATE DATABASE finwise;
+EXIT;
 
 # 2. Run migration
-psql -d finwise -f database/migrations/V1__initial_schema.sql
+mysql -u root -p finwise < database/migrations/V1__initial_schema.sql
 
 # 3. Backend (starts on http://localhost:8080)
 cd backend
@@ -125,7 +127,7 @@ npm install
 npm run dev
 ```
 
-PostgreSQL is used across all environments (dev, test, prod) for consistency.
+MySQL is used across all environments (dev, test, prod) for consistency.
 
 ---
 

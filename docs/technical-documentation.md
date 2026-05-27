@@ -56,7 +56,7 @@ FinWise is an AI-powered financial management platform designed to help users ta
 
 | Component | Technology |
 |-----------|-----------|
-| Database | PostgreSQL 15+ (all environments) |
+| Database | MySQL 8.0+ (all environments) |
 | Build Tool | Maven 3.8+ |
 | Package Manager | npm |
 | Version Control | Git |
@@ -104,7 +104,7 @@ FinWise is an AI-powered financial management platform designed to help users ta
 ┌─────────────────────────────────────────────────────────────────┐
 │                        DATA LAYER                                │
 │                                                                  │
-│   PostgreSQL 15 (all environments)                              │
+│   MySQL 8.0 (all environments)                                  │
 │                                                                  │
 │   Tables: users, expenses, budgets, budget_categories,          │
 │           savings_goals, goal_contributions, ai_insights,       │
@@ -344,18 +344,20 @@ Validation errors include field details:
 - Java 17+ (JDK)
 - Maven 3.8+
 - Node.js 18+
-- PostgreSQL 15+
+- MySQL 8.0+
 - Git
 
 ### Database Setup
 ```bash
 # Create databases
-createdb finwise
-createdb finwise_test
+mysql -u root -p
+CREATE DATABASE finwise;
+CREATE DATABASE finwise_test;
+EXIT;
 
 # Run migration
-psql -d finwise -f database/migrations/V1__initial_schema.sql
-psql -d finwise_test -f database/migrations/V1__initial_schema.sql
+mysql -u root -p finwise < database/migrations/V1__initial_schema.sql
+mysql -u root -p finwise_test < database/migrations/V1__initial_schema.sql
 ```
 
 ### Backend (runs on port 8080)
@@ -363,7 +365,7 @@ psql -d finwise_test -f database/migrations/V1__initial_schema.sql
 cd backend
 mvn spring-boot:run
 # Defaults to 'dev' profile
-# Connects to PostgreSQL localhost:5432/finwise
+# Connects to MySQL localhost:3306/finwise
 # Dev profile uses ddl-auto=update (auto-creates/updates tables)
 ```
 
@@ -373,8 +375,6 @@ cd frontend
 npm install
 npm run dev
 ```
-
-### Environment Profiles
 
 | Profile | DB | DDL Auto | Logging | Use Case |
 |---------|-----|----------|---------|----------|

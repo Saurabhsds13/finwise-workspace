@@ -1,4 +1,4 @@
-# FinWise - Entity Relationship Diagram
+# FinWise - Entity Relationship Diagram (MySQL)
 
 ```
 ┌─────────────────────┐

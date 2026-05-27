@@ -92,18 +92,18 @@ finwise-workspace/
 - Node.js 18+
 - Java 17+
 - Maven 3.8+
-- PostgreSQL 15+
+- MySQL 8.0+
 
 ### Database Setup
 ```bash
-# 1. Install PostgreSQL 15+
-# 2. Create the databases
-createdb finwise
-createdb finwise_test
+# 1. Open MySQL and create the databases
+mysql -u root -p
+CREATE DATABASE finwise;
+CREATE DATABASE finwise_test;
+EXIT;
 
-# 3. Run the migration script
-psql -d finwise -f database/migrations/V1__initial_schema.sql
-psql -d finwise_test -f database/migrations/V1__initial_schema.sql
+# 2. Run the migration script
+mysql -u root -p finwise < database/migrations/V1__initial_schema.sql
 ```
 
 ### Frontend
@@ -118,7 +118,7 @@ npm run dev        # starts on http://localhost:5173
 cd backend
 mvn spring-boot:run
 # Starts on http://localhost:8080
-# Uses PostgreSQL (localhost:5432/finwise)
+# Uses MySQL (localhost:3306/finwise)
 # Dev profile: auto-updates schema via Hibernate
 ```
 
