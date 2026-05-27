@@ -1,0 +1,57 @@
+.goals-page {
+  max-width: 1000px;
+}
+
+.goals-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.goals-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.goals-section {
+  margin-bottom: 32px;
+}
+
+.goals-section h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.goals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.goals-empty {
+  text-align: center;
+  padding: 48px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.goals-empty p {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.goals-empty span {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.goals-loading {
+  text-align: center;
+  padding: 48px;
+  color: var(--text-secondary);
+}

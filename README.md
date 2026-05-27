@@ -79,13 +79,20 @@ finwise-workspace/
 6. **Dashboard & Analytics** — Visual charts and summary cards
 7. **AI-Based Suggestions** — Pattern detection, budget alerts, personalized advice
 
+## Documentation
+
+- [`docs/technical-documentation.md`](docs/technical-documentation.md) — Full technical documentation (architecture, API, security, patterns)
+- [`docs/progress-report.md`](docs/progress-report.md) — Client-facing progress report
+- [`docs/architecture.md`](docs/architecture.md) — System architecture overview
+- [`database/erd.md`](database/erd.md) — Entity relationship diagram
+
 ## Getting Started
 
 ### Prerequisites
 - Node.js 18+
 - Java 17+
 - Maven 3.8+
-- PostgreSQL 15+ (or use H2 for dev)
+- PostgreSQL 15+ (only for production — dev uses H2 in-memory)
 
 ### Frontend
 ```bash
