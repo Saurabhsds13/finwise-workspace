@@ -2,16 +2,22 @@ import { useAuthStore } from '../store/authStore';
 import { authService, LoginRequest, RegisterRequest } from '../services/authService';
 
 export function useAuth() {
-  const { user, isAuthenticated, isLoading, setUser, setLoading, logout } = useAuthStore();
+  const { user, isAuthenticated, isLoading, setUser, setLoading, logout: storeLogout } = useAuthStore();
 
   const login = async (data: LoginRequest) => {
     setLoading(true);
     try {
       const response = await authService.login(data);
-      localStorage.setItem('accessToken', response.data.token);
-      setUser(response.data.user);
-    } finally {
+      const { token, refreshToken, user: userData } = response.data;
+
+      localStorage.setItem('accessToken', token);
+      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      setUser(userData);
+    } catch (error) {
       setLoading(false);
+      throw error;
     }
   };
 
@@ -19,10 +25,26 @@ export function useAuth() {
     setLoading(true);
     try {
       const response = await authService.register(data);
-      localStorage.setItem('accessToken', response.data.token);
-      setUser(response.data.user);
-    } finally {
+      const { token, refreshToken, user: userData } = response.data;
+
+      localStorage.setItem('accessToken', token);
+      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      setUser(userData);
+    } catch (error) {
       setLoading(false);
+      throw error;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // Logout even if API call fails
+    } finally {
+      storeLogout();
     }
   };
 
