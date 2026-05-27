@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,22 +26,22 @@ import java.util.stream.Collectors;
 public class BudgetServiceImpl implements BudgetService {
 
     private final BudgetRepository budgetRepository;
-    private final UserRepository userRepository;
     private final ExpenseRepository expenseRepository;
+    private final UserRepository userRepository;
 
     @Override
     public List<BudgetResponse> getAllByUser(String userId) {
         return budgetRepository.findByUserId(userId)
                 .stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+                .map(budget -> toResponse(budget, userId))
+                .toList();
     }
 
     @Override
     public BudgetResponse getById(String id) {
         Budget budget = budgetRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Budget", id));
-        return toResponse(budget);
+        return toResponse(budget, budget.getUser().getId());
     }
 
     @Override
@@ -59,19 +60,20 @@ public class BudgetServiceImpl implements BudgetService {
                 .categories(new ArrayList<>())
                 .build();
 
+        // Add categories
         if (request.getCategories() != null) {
-            List<BudgetCategory> categories = request.getCategories().stream()
-                    .map(cat -> BudgetCategory.builder()
-                            .budget(budget)
-                            .name(cat.getName())
-                            .allocatedAmount(cat.getAllocatedAmount())
-                            .build())
-                    .collect(Collectors.toList());
-            budget.setCategories(categories);
+            for (BudgetRequest.CategoryAllocation catReq : request.getCategories()) {
+                BudgetCategory category = BudgetCategory.builder()
+                        .budget(budget)
+                        .name(catReq.getName())
+                        .allocatedAmount(catReq.getAllocatedAmount())
+                        .build();
+                budget.getCategories().add(category);
+            }
         }
 
-        Budget saved = budgetRepository.save(budget);
-        return toResponse(saved);
+        budget = budgetRepository.save(budget);
+        return toResponse(budget, userId);
     }
 
     @Override
@@ -86,20 +88,21 @@ public class BudgetServiceImpl implements BudgetService {
         budget.setStartDate(request.getStartDate());
         budget.setEndDate(request.getEndDate());
 
+        // Update categories
+        budget.getCategories().clear();
         if (request.getCategories() != null) {
-            budget.getCategories().clear();
-            request.getCategories().forEach(cat -> {
+            for (BudgetRequest.CategoryAllocation catReq : request.getCategories()) {
                 BudgetCategory category = BudgetCategory.builder()
                         .budget(budget)
-                        .name(cat.getName())
-                        .allocatedAmount(cat.getAllocatedAmount())
+                        .name(catReq.getName())
+                        .allocatedAmount(catReq.getAllocatedAmount())
                         .build();
                 budget.getCategories().add(category);
-            });
+            }
         }
 
-        Budget saved = budgetRepository.save(budget);
-        return toResponse(saved);
+        budget = budgetRepository.save(budget);
+        return toResponse(budget, budget.getUser().getId());
     }
 
     @Override
@@ -117,41 +120,46 @@ public class BudgetServiceImpl implements BudgetService {
         return budgetRepository
                 .findByUserIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(userId, today, today)
                 .stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+                .map(budget -> toResponse(budget, userId))
+                .toList();
     }
 
-    private BudgetResponse toResponse(Budget budget) {
-        // Calculate spent amount from expenses within budget period
-        BigDecimal spentAmount = BigDecimal.ZERO;
-        List<Object[]> categoryTotals = expenseRepository.getCategoryTotals(
-                budget.getUser().getId(), budget.getStartDate(), budget.getEndDate());
+    private BudgetResponse toResponse(Budget budget, String userId) {
+        // Calculate spent amounts from expenses within budget period
+        Map<String, BigDecimal> categorySpending = getCategorySpending(userId, budget.getStartDate(), budget.getEndDate());
 
-        for (Object[] row : categoryTotals) {
-            spentAmount = spentAmount.add((BigDecimal) row[1]);
-        }
+        BigDecimal totalSpent = categorySpending.values().stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal finalSpent = spentAmount;
         List<BudgetResponse.CategoryResponse> categoryResponses = budget.getCategories() != null
                 ? budget.getCategories().stream()
                     .map(cat -> BudgetResponse.CategoryResponse.builder()
                             .id(cat.getId())
                             .name(cat.getName())
                             .allocatedAmount(cat.getAllocatedAmount())
-                            .spentAmount(BigDecimal.ZERO) // simplified
+                            .spentAmount(categorySpending.getOrDefault(cat.getName(), BigDecimal.ZERO))
                             .build())
-                    .collect(Collectors.toList())
+                    .toList()
                 : List.of();
 
         return BudgetResponse.builder()
                 .id(budget.getId())
                 .name(budget.getName())
                 .totalAmount(budget.getTotalAmount())
-                .spentAmount(finalSpent)
+                .spentAmount(totalSpent)
                 .period(budget.getPeriod().name())
                 .startDate(budget.getStartDate())
                 .endDate(budget.getEndDate())
                 .categories(categoryResponses)
                 .build();
+    }
+
+    private Map<String, BigDecimal> getCategorySpending(String userId, LocalDate start, LocalDate end) {
+        List<Object[]> results = expenseRepository.getCategoryTotals(userId, start, end);
+        return results.stream()
+                .collect(Collectors.toMap(
+                        row -> (String) row[0],
+                        row -> (BigDecimal) row[1]
+                ));
     }
 }
