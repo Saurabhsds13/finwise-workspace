@@ -109,17 +109,23 @@ FinWise is an AI-powered financial management platform that enables users to tra
 ## How to Run Locally
 
 ```bash
-# Backend (starts on http://localhost:8080)
+# 1. Setup PostgreSQL database
+createdb finwise
+
+# 2. Run migration
+psql -d finwise -f database/migrations/V1__initial_schema.sql
+
+# 3. Backend (starts on http://localhost:8080)
 cd backend
 mvn spring-boot:run
 
-# Frontend (starts on http://localhost:5173)
+# 4. Frontend (starts on http://localhost:5173)
 cd frontend
 npm install
 npm run dev
 ```
 
-No external database required for development — uses H2 in-memory database.
+PostgreSQL is used across all environments (dev, test, prod) for consistency.
 
 ---
 
