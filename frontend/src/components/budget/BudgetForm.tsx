@@ -198,7 +198,7 @@ function BudgetForm({ budgetId, onSubmit, onCancel }: BudgetFormProps) {
           <div className="categories-header">
             <h4>Category Allocations</h4>
             <span className="allocation-summary">
-              Allocated: ${allocatedTotal.toFixed(2)} / ${parseFloat(formData.totalAmount || '0').toFixed(2)}
+              Allocated: ₹{allocatedTotal.toFixed(2)} / ₹{parseFloat(formData.totalAmount || '0').toFixed(2)}
             </span>
           </div>
 

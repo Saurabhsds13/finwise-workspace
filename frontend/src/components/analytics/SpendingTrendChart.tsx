@@ -20,8 +20,8 @@ function SpendingTrendChart({ trends }: SpendingTrendChartProps) {
   );
 
   const formatAmount = (amount: number) => {
-    if (amount >= 1000) return `$${(amount / 1000).toFixed(1)}k`;
-    return `$${amount.toFixed(0)}`;
+    if (amount >= 1000) return `₹${(amount / 1000).toFixed(1)}k`;
+    return `₹${amount.toFixed(0)}`;
   };
 
   return (

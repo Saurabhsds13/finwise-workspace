@@ -9,7 +9,7 @@ function Analytics() {
   const { overview, categories, trends, insights, isLoading } = useAnalytics(period);
 
   const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
   };
 
   if (isLoading) {

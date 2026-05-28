@@ -219,6 +219,6 @@ public class AiAdvisorServiceImpl implements AiAdvisorService {
     }
 
     private String formatCurrency(BigDecimal amount) {
-        return "$" + amount.setScale(2, RoundingMode.HALF_UP).toPlainString();
+        return "\u20B9" + amount.setScale(2, RoundingMode.HALF_UP).toPlainString();
     }
 }
