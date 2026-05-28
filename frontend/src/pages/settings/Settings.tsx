@@ -1,12 +1,16 @@
 import { useState, FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useAuthStore } from '../../store/authStore';
 import { userService } from '../../services/userService';
+import ConfirmModal from '../../components/common/ConfirmModal';
 import './settings.css';
 
 function Settings() {
   const { user } = useAuth();
   const setUser = useAuthStore((state) => state.setUser);
+  const logout = useAuthStore((state) => state.logout);
+  const navigate = useNavigate();
 
   const [profileData, setProfileData] = useState({
     firstName: user?.firstName || '',
@@ -26,6 +30,7 @@ function Settings() {
   const [passwordSuccess, setPasswordSuccess] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleProfileSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -96,6 +101,17 @@ function Settings() {
       }
     } finally {
       setPasswordLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      await userService.deleteAccount();
+      logout();
+      navigate('/login');
+    } catch {
+      setShowDeleteModal(false);
+      alert('Failed to delete account. Please try again.');
     }
   };
 
@@ -257,10 +273,21 @@ function Settings() {
                 Permanently delete your account and all associated data. This action cannot be undone.
               </p>
             </div>
-            <button className="btn-danger">Delete Account</button>
+            <button className="btn-danger" onClick={() => setShowDeleteModal(true)}>Delete Account</button>
           </div>
         </div>
       </section>
+      {showDeleteModal && (
+        <ConfirmModal
+          title="Delete Account"
+          message="Are you sure you want to delete your account? This will permanently remove all your data including expenses, budgets, goals, and insights. This action cannot be undone."
+          confirmText="Yes, Delete My Account"
+          cancelText="Keep Account"
+          danger
+          onConfirm={handleDeleteAccount}
+          onCancel={() => setShowDeleteModal(false)}
+        />
+      )}
     </div>
   );
 }

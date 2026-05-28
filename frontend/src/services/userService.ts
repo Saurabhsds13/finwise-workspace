@@ -14,4 +14,5 @@ export const userService = {
   getProfile: () => api.get('/user/profile'),
   updateProfile: (data: UpdateProfileData) => api.put('/user/profile', data),
   changePassword: (data: ChangePasswordData) => api.put('/user/change-password', data),
+  deleteAccount: () => api.delete('/user/account'),
 };

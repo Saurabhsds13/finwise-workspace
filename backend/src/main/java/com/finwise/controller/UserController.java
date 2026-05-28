@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -43,6 +44,7 @@ public class UserController {
     }
 
     @PutMapping("/profile")
+    @Transactional
     public ResponseEntity<AuthResponse.UserDto> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
         String userId = SecurityUtils.getCurrentUserId();
         User user = userRepository.findById(userId)
@@ -61,6 +63,7 @@ public class UserController {
     }
 
     @PutMapping("/change-password")
+    @Transactional
     public ResponseEntity<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         String userId = SecurityUtils.getCurrentUserId();
         User user = userRepository.findById(userId)
@@ -74,5 +77,17 @@ public class UserController {
         userRepository.save(user);
 
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/account")
+    @Transactional
+    public ResponseEntity<Void> deleteAccount() {
+        String userId = SecurityUtils.getCurrentUserId();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        userRepository.delete(user);
+        return ResponseEntity.noContent().build();
     }
 }
