@@ -25,6 +25,8 @@ function Footer() {
             <h4>Company</h4>
             <Link to="/about">About Us</Link>
             <Link to="/contact">Contact</Link>
+            <Link to="/privacy">Privacy Policy</Link>
+            <Link to="/terms">Terms of Service</Link>
           </div>
 
           <div className="footer-column">
@@ -38,6 +40,10 @@ function Footer() {
 
       <div className="footer-bottom">
         <p>&copy; {currentYear} FinWise. All rights reserved.</p>
+        <div className="footer-legal">
+          <Link to="/privacy">Privacy Policy</Link>
+          <Link to="/terms">Terms of Service</Link>
+        </div>
         <p className="footer-made">Made with ❤️ in India</p>
       </div>
     </footer>

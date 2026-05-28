@@ -18,6 +18,8 @@ import AiAdvisor from '../pages/ai-advisor/AiAdvisor';
 import Settings from '../pages/settings/Settings';
 import About from '../pages/about/About';
 import Contact from '../pages/contact/Contact';
+import PrivacyPolicy from '../pages/privacy/PrivacyPolicy';
+import TermsOfService from '../pages/terms/TermsOfService';
 
 function AppRoutes() {
   return (
@@ -44,6 +46,8 @@ function AppRoutes() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/about" element={<About />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
       </Route>
     </Routes>
   );

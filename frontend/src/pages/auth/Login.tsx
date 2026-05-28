@@ -52,75 +52,79 @@ function Login() {
         <nav className="landing-nav">
           <span className="landing-logo">FinWise</span>
           <div className="landing-nav-links">
-            <a href="#features">Features</a>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
+            <a href="#features" onClick={(e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); }}>Features</a>
+            <a href="#about" onClick={(e) => { e.preventDefault(); document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' }); }}>About</a>
+            <a href="#contact" onClick={(e) => { e.preventDefault(); document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }}>Contact</a>
           </div>
         </nav>
 
         <div className="landing-hero">
           <h1>Take Control of Your <span className="highlight">Finances</span></h1>
           <p className="hero-subtitle">
-            AI-powered financial management that helps you track expenses, plan budgets,
-            set savings goals, and receive personalized advice — all in one place.
+            AI-powered financial management — track expenses, plan budgets,
+            set savings goals, and get personalized advice.
           </p>
+          <div className="hero-stats">
+            <div className="hero-stat">
+              <span className="hero-stat-value">10+</span>
+              <span className="hero-stat-label">Expense Categories</span>
+            </div>
+            <div className="hero-stat">
+              <span className="hero-stat-value">AI</span>
+              <span className="hero-stat-label">Smart Insights</span>
+            </div>
+            <div className="hero-stat">
+              <span className="hero-stat-value">100%</span>
+              <span className="hero-stat-label">Free & Secure</span>
+            </div>
+          </div>
         </div>
 
-        {/* Features Section */}
+        {/* Features */}
         <section id="features" className="landing-features">
           <div className="feature-item">
             <span className="feature-emoji">💸</span>
-            <div>
-              <h3>Expense Tracking</h3>
-              <p>Categorize and monitor every rupee with smart categorization</p>
-            </div>
+            <span>Expense Tracking</span>
           </div>
           <div className="feature-item">
             <span className="feature-emoji">📋</span>
-            <div>
-              <h3>Budget Planning</h3>
-              <p>Create budgets with category allocations and real-time tracking</p>
-            </div>
+            <span>Budget Planning</span>
           </div>
           <div className="feature-item">
             <span className="feature-emoji">🎯</span>
-            <div>
-              <h3>Savings Goals</h3>
-              <p>Set targets, track contributions, and celebrate milestones</p>
-            </div>
+            <span>Savings Goals</span>
           </div>
           <div className="feature-item">
             <span className="feature-emoji">🤖</span>
-            <div>
-              <h3>AI Advisor</h3>
-              <p>Get personalized insights based on your spending patterns</p>
-            </div>
+            <span>AI Advisor</span>
+          </div>
+          <div className="feature-item">
+            <span className="feature-emoji">📈</span>
+            <span>Analytics</span>
+          </div>
+          <div className="feature-item">
+            <span className="feature-emoji">🔒</span>
+            <span>Secure & Private</span>
           </div>
         </section>
 
-        {/* About Section */}
-        <section id="about" className="landing-about">
-          <h2>About FinWise</h2>
-          <p>
-            FinWise is built for individuals who want clarity over their money without
-            the complexity of traditional financial tools. Our AI engine analyzes your
-            spending behavior and provides actionable recommendations to help you save
-            more and spend smarter.
-          </p>
-        </section>
+        {/* About + Contact */}
+        <div className="landing-bottom">
+          <section id="about" className="landing-about">
+            <p>
+              FinWise helps individuals gain clarity over their money with intelligent
+              tracking and AI-driven insights — no complexity, just results.
+            </p>
+          </section>
 
-        {/* Contact Section */}
-        <section id="contact" className="landing-contact">
-          <h2>Get in Touch</h2>
-          <div className="contact-items">
-            <div className="contact-chip">📧 support@finwise.app</div>
-            <div className="contact-chip">📍 Mumbai, India</div>
-            <div className="contact-chip">⏰ Mon-Fri, 9AM-6PM IST</div>
-          </div>
-        </section>
+          <section id="contact" className="landing-contact">
+            <span className="contact-chip">📧 support@finwise.app</span>
+            <span className="contact-chip">📍 Mumbai, India</span>
+          </section>
+        </div>
 
         <footer className="landing-footer">
-          <p>&copy; {new Date().getFullYear()} FinWise. All rights reserved. Made with ❤️ in India</p>
+          <p>&copy; {new Date().getFullYear()} FinWise. Made with ❤️ in India</p>
         </footer>
       </div>
 
