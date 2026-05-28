@@ -1,10 +1,11 @@
 package com.finwise.service;
 
-import com.finwise.entity.AiInsight;
+import com.finwise.dto.analytics.AiInsightResponse;
+
 import java.util.List;
 
 public interface AiAdvisorService {
-    List<AiInsight> getInsights(String userId);
-    List<AiInsight> generateInsights(String userId);
+    List<AiInsightResponse> getInsights(String userId);
+    List<AiInsightResponse> generateInsights(String userId);
     void analyzeSpendingBehavior(String userId);
 }

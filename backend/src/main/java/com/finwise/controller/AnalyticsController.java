@@ -1,9 +1,9 @@
 package com.finwise.controller;
 
+import com.finwise.dto.analytics.AiInsightResponse;
 import com.finwise.dto.analytics.SpendingOverview;
 import com.finwise.dto.analytics.CategoryBreakdown;
 import com.finwise.dto.analytics.SpendingTrend;
-import com.finwise.entity.AiInsight;
 import com.finwise.security.SecurityUtils;
 import com.finwise.service.AnalyticsService;
 import com.finwise.service.AiAdvisorService;
@@ -45,13 +45,13 @@ public class AnalyticsController {
     }
 
     @GetMapping("/ai-insights")
-    public ResponseEntity<List<AiInsight>> getAiInsights() {
+    public ResponseEntity<List<AiInsightResponse>> getAiInsights() {
         String userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(aiAdvisorService.getInsights(userId));
     }
 
     @GetMapping("/ai-suggestions")
-    public ResponseEntity<List<AiInsight>> getAiSuggestions() {
+    public ResponseEntity<List<AiInsightResponse>> getAiSuggestions() {
         String userId = SecurityUtils.getCurrentUserId();
         return ResponseEntity.ok(aiAdvisorService.generateInsights(userId));
     }

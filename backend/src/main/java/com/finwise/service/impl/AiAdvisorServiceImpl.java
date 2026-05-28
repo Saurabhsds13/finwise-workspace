@@ -1,5 +1,6 @@
 package com.finwise.service.impl;
 
+import com.finwise.dto.analytics.AiInsightResponse;
 import com.finwise.entity.AiInsight;
 import com.finwise.entity.Budget;
 import com.finwise.entity.SavingsGoal;
@@ -48,13 +49,16 @@ public class AiAdvisorServiceImpl implements AiAdvisorService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<AiInsight> getInsights(String userId) {
-        return insightRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    public List<AiInsightResponse> getInsights(String userId) {
+        return insightRepository.findByUserIdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override
     @Transactional
-    public List<AiInsight> generateInsights(String userId) {
+    public List<AiInsightResponse> generateInsights(String userId) {
         log.info("Generating AI insights for user: {}", userId);
 
         User user = userRepository.findById(userId)
@@ -70,7 +74,7 @@ public class AiAdvisorServiceImpl implements AiAdvisorService {
             log.info("Generated {} insights for user: {}", insights.size(), userId);
         }
 
-        return insights;
+        return insights.stream().map(this::toResponse).toList();
     }
 
     @Override
@@ -220,5 +224,16 @@ public class AiAdvisorServiceImpl implements AiAdvisorService {
 
     private String formatCurrency(BigDecimal amount) {
         return "\u20B9" + amount.setScale(2, RoundingMode.HALF_UP).toPlainString();
+    }
+
+    private AiInsightResponse toResponse(AiInsight insight) {
+        return AiInsightResponse.builder()
+                .id(insight.getId())
+                .type(insight.getType().name())
+                .title(insight.getTitle())
+                .message(insight.getMessage())
+                .isRead(insight.isRead())
+                .createdAt(insight.getCreatedAt())
+                .build();
     }
 }
