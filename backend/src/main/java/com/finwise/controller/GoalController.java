@@ -5,7 +5,7 @@ import com.finwise.dto.goal.GoalResponse;
 import com.finwise.security.SecurityUtils;
 import com.finwise.service.GoalService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,10 +16,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/goals")
-@RequiredArgsConstructor
 public class GoalController {
 
     private final GoalService goalService;
+
+    @Autowired
+    public GoalController(GoalService goalService) {
+        this.goalService = goalService;
+    }
 
     @GetMapping
     public ResponseEntity<List<GoalResponse>> getAll() {

@@ -7,8 +7,9 @@ import com.finwise.entity.Budget;
 import com.finwise.repository.BudgetRepository;
 import com.finwise.repository.ExpenseRepository;
 import com.finwise.service.AnalyticsService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,13 +20,19 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class AnalyticsServiceImpl implements AnalyticsService {
+
+    private static final Logger log = LoggerFactory.getLogger(AnalyticsServiceImpl.class);
 
     private final ExpenseRepository expenseRepository;
     private final BudgetRepository budgetRepository;
+
+    @Autowired
+    public AnalyticsServiceImpl(ExpenseRepository expenseRepository, BudgetRepository budgetRepository) {
+        this.expenseRepository = expenseRepository;
+        this.budgetRepository = budgetRepository;
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -36,12 +43,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         LocalDate start = dateRange[0];
         LocalDate end = dateRange[1];
 
-        // Calculate total spent in period
         BigDecimal totalSpent = calculateTotalSpent(userId, start, end);
-
-        // Get active budget total for the period
         BigDecimal totalBudget = getActiveBudgetTotal(userId, start, end);
-
         BigDecimal remainingBudget = totalBudget.subtract(totalSpent);
 
         double utilization = totalBudget.compareTo(BigDecimal.ZERO) > 0

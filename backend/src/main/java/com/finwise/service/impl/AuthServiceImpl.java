@@ -13,32 +13,38 @@ import com.finwise.repository.RefreshTokenRepository;
 import com.finwise.repository.UserRepository;
 import com.finwise.security.JwtUtil;
 import com.finwise.service.AuthService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
-/**
- * Authentication service implementation.
- *
- * SOLID principles applied:
- * - SRP: Only handles authentication logic
- * - OCP: New auth methods (OAuth, SSO) can be added without modifying existing code
- * - DIP: Depends on abstractions (interfaces) not concrete implementations
- */
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthMapper authMapper;
+
+    @Autowired
+    public AuthServiceImpl(UserRepository userRepository,
+                           RefreshTokenRepository refreshTokenRepository,
+                           PasswordEncoder passwordEncoder,
+                           JwtUtil jwtUtil,
+                           AuthMapper authMapper) {
+        this.userRepository = userRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+        this.authMapper = authMapper;
+    }
 
     @Override
     @Transactional
@@ -73,7 +79,6 @@ public class AuthServiceImpl implements AuthService {
             throw new AuthException("Invalid email or password", ErrorCodes.INVALID_CREDENTIALS);
         }
 
-        // Invalidate existing refresh tokens (single session enforcement)
         refreshTokenRepository.deleteByUserId(user.getId());
 
         log.info("User logged in successfully: {}", user.getId());

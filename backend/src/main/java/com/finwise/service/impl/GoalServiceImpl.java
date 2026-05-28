@@ -13,8 +13,9 @@ import com.finwise.repository.GoalContributionRepository;
 import com.finwise.repository.SavingsGoalRepository;
 import com.finwise.repository.UserRepository;
 import com.finwise.service.GoalService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,15 +28,26 @@ import java.util.List;
  * Handles goal lifecycle: creation, contribution tracking, status transitions.
  * Automatically marks goals as COMPLETED when target is reached.
  */
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class GoalServiceImpl implements GoalService {
+
+    private static final Logger log = LoggerFactory.getLogger(GoalServiceImpl.class);
 
     private final SavingsGoalRepository goalRepository;
     private final GoalContributionRepository contributionRepository;
     private final UserRepository userRepository;
     private final GoalMapper goalMapper;
+
+    @Autowired
+    public GoalServiceImpl(SavingsGoalRepository goalRepository,
+                           GoalContributionRepository contributionRepository,
+                           UserRepository userRepository,
+                           GoalMapper goalMapper) {
+        this.goalRepository = goalRepository;
+        this.contributionRepository = contributionRepository;
+        this.userRepository = userRepository;
+        this.goalMapper = goalMapper;
+    }
 
     @Override
     @Transactional(readOnly = true)

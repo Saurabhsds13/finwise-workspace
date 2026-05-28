@@ -10,6 +10,12 @@ backend/*.jar
 .idea/
 *.iml
 .vscode/
+.project
+.classpath
+.settings/
+.factorypath
+bin/
+.sts4-cache/
 
 # Environment
 .env

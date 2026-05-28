@@ -7,8 +7,9 @@ import com.finwise.entity.User;
 import com.finwise.exception.ResourceNotFoundException;
 import com.finwise.repository.*;
 import com.finwise.service.AiAdvisorService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,25 +22,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * AI Advisor service — rule-based spending analysis engine.
- *
- * Generates insights by analyzing:
- * - Budget utilization rates
- * - Category spending patterns
- * - Goal progress vs timeline
- * - Month-over-month spending changes
- */
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class AiAdvisorServiceImpl implements AiAdvisorService {
+
+    private static final Logger log = LoggerFactory.getLogger(AiAdvisorServiceImpl.class);
 
     private final AiInsightRepository insightRepository;
     private final ExpenseRepository expenseRepository;
     private final BudgetRepository budgetRepository;
     private final SavingsGoalRepository goalRepository;
     private final UserRepository userRepository;
+
+    @Autowired
+    public AiAdvisorServiceImpl(AiInsightRepository insightRepository,
+                                ExpenseRepository expenseRepository,
+                                BudgetRepository budgetRepository,
+                                SavingsGoalRepository goalRepository,
+                                UserRepository userRepository) {
+        this.insightRepository = insightRepository;
+        this.expenseRepository = expenseRepository;
+        this.budgetRepository = budgetRepository;
+        this.goalRepository = goalRepository;
+        this.userRepository = userRepository;
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -56,12 +61,10 @@ public class AiAdvisorServiceImpl implements AiAdvisorService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
         List<AiInsight> insights = new ArrayList<>();
-
         insights.addAll(analyzeBudgetUtilization(user));
         insights.addAll(analyzeGoalProgress(user));
         insights.addAll(analyzeSpendingPatterns(user));
 
-        // Save generated insights
         if (!insights.isEmpty()) {
             insightRepository.saveAll(insights);
             log.info("Generated {} insights for user: {}", insights.size(), userId);
@@ -81,7 +84,8 @@ public class AiAdvisorServiceImpl implements AiAdvisorService {
         LocalDate today = LocalDate.now();
 
         List<Budget> activeBudgets = budgetRepository
-                .findByUserIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(user.getId(), today, today);
+                .findByUserIdAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+                        user.getId(), today, today);
 
         for (Budget budget : activeBudgets) {
             List<Object[]> categoryTotals = expenseRepository.getCategoryTotals(
@@ -96,7 +100,6 @@ public class AiAdvisorServiceImpl implements AiAdvisorService {
                         .multiply(BigDecimal.valueOf(100)).doubleValue()
                     : 0;
 
-            // Days elapsed vs total days
             long totalDays = ChronoUnit.DAYS.between(budget.getStartDate(), budget.getEndDate()) + 1;
             long daysElapsed = ChronoUnit.DAYS.between(budget.getStartDate(), today) + 1;
             double timeProgress = (double) daysElapsed / totalDays * 100;
@@ -104,21 +107,20 @@ public class AiAdvisorServiceImpl implements AiAdvisorService {
             if (utilization > 90) {
                 insights.add(buildInsight(user, AiInsight.InsightType.WARNING,
                         "Budget Almost Exhausted",
-                        String.format("Your '%s' budget is %.0f%% used with %d days remaining. Consider reducing spending.",
+                        String.format("Your '%s' budget is %.0f%% used with %d days remaining.",
                                 budget.getName(), utilization, totalDays - daysElapsed)));
             } else if (utilization > timeProgress + 15) {
                 insights.add(buildInsight(user, AiInsight.InsightType.WARNING,
                         "Spending Ahead of Schedule",
-                        String.format("You've spent %.0f%% of your '%s' budget but only %.0f%% of the period has passed.",
+                        String.format("You've spent %.0f%% of '%s' but only %.0f%% of the period passed.",
                                 utilization, budget.getName(), timeProgress)));
             } else if (utilization < timeProgress - 20 && utilization > 0) {
                 insights.add(buildInsight(user, AiInsight.InsightType.ACHIEVEMENT,
                         "Great Budget Discipline",
-                        String.format("You're under budget on '%s'. Only %.0f%% spent with %.0f%% of the period elapsed.",
+                        String.format("Under budget on '%s'. %.0f%% spent, %.0f%% of period elapsed.",
                                 budget.getName(), utilization, timeProgress)));
             }
         }
-
         return insights;
     }
 
@@ -137,17 +139,17 @@ public class AiAdvisorServiceImpl implements AiAdvisorService {
             if (daysRemaining <= 0 && remaining.compareTo(BigDecimal.ZERO) > 0) {
                 insights.add(buildInsight(user, AiInsight.InsightType.WARNING,
                         "Goal Deadline Passed",
-                        String.format("Your goal '%s' has passed its deadline. You still need %s to reach your target.",
+                        String.format("'%s' passed its deadline. Still need %s.",
                                 goal.getName(), formatCurrency(remaining))));
             } else if (daysRemaining > 0 && daysRemaining <= 30) {
-                BigDecimal dailyNeeded = remaining.divide(BigDecimal.valueOf(daysRemaining), 2, RoundingMode.HALF_UP);
+                BigDecimal dailyNeeded = remaining.divide(
+                        BigDecimal.valueOf(daysRemaining), 2, RoundingMode.HALF_UP);
                 insights.add(buildInsight(user, AiInsight.InsightType.SUGGESTION,
                         "Goal Deadline Approaching",
-                        String.format("You need to save %s/day to reach your '%s' goal in %d days.",
+                        String.format("Save %s/day to reach '%s' in %d days.",
                                 formatCurrency(dailyNeeded), goal.getName(), daysRemaining)));
             }
 
-            // Progress milestone
             double progress = goal.getTargetAmount().compareTo(BigDecimal.ZERO) > 0
                     ? goal.getCurrentAmount().divide(goal.getTargetAmount(), 4, RoundingMode.HALF_UP)
                         .multiply(BigDecimal.valueOf(100)).doubleValue()
@@ -156,11 +158,10 @@ public class AiAdvisorServiceImpl implements AiAdvisorService {
             if (progress >= 75 && progress < 100) {
                 insights.add(buildInsight(user, AiInsight.InsightType.ACHIEVEMENT,
                         "Almost There!",
-                        String.format("You're %.0f%% of the way to your '%s' goal. Keep it up!",
+                        String.format("%.0f%% of the way to '%s'. Keep it up!",
                                 progress, goal.getName())));
             }
         }
-
         return insights;
     }
 
@@ -168,7 +169,6 @@ public class AiAdvisorServiceImpl implements AiAdvisorService {
         List<AiInsight> insights = new ArrayList<>();
         LocalDate today = LocalDate.now();
 
-        // Compare current month vs previous month
         LocalDate thisMonthStart = today.withDayOfMonth(1);
         LocalDate lastMonthStart = thisMonthStart.minusMonths(1);
         LocalDate lastMonthEnd = thisMonthStart.minusDays(1);
@@ -189,26 +189,23 @@ public class AiAdvisorServiceImpl implements AiAdvisorService {
                 if (changePercent > 50) {
                     insights.add(buildInsight(user, AiInsight.InsightType.WARNING,
                             "Spending Spike: " + category,
-                            String.format("Your %s spending is up %.0f%% compared to last month (%s → %s).",
-                                    category, changePercent, formatCurrency(previousAmount), formatCurrency(currentAmount))));
+                            String.format("%s spending up %.0f%% vs last month (%s -> %s).",
+                                    category, changePercent,
+                                    formatCurrency(previousAmount), formatCurrency(currentAmount))));
                 } else if (changePercent < -30) {
                     insights.add(buildInsight(user, AiInsight.InsightType.ACHIEVEMENT,
                             "Spending Reduced: " + category,
-                            String.format("Great job! Your %s spending decreased by %.0f%% compared to last month.",
+                            String.format("%s spending decreased %.0f%% vs last month.",
                                     category, Math.abs(changePercent))));
                 }
             }
         }
-
         return insights;
     }
 
     private Map<String, BigDecimal> getCategoryMap(String userId, LocalDate start, LocalDate end) {
         return expenseRepository.getCategoryTotals(userId, start, end).stream()
-                .collect(Collectors.toMap(
-                        row -> (String) row[0],
-                        row -> (BigDecimal) row[1]
-                ));
+                .collect(Collectors.toMap(row -> (String) row[0], row -> (BigDecimal) row[1]));
     }
 
     private AiInsight buildInsight(User user, AiInsight.InsightType type, String title, String message) {

@@ -9,32 +9,32 @@ import com.finwise.mapper.ExpenseMapper;
 import com.finwise.repository.ExpenseRepository;
 import com.finwise.repository.UserRepository;
 import com.finwise.service.ExpenseService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Expense service implementation.
- *
- * SOLID principles applied:
- * - SRP: Only handles expense business logic
- * - OCP: New expense types can be added via strategy pattern
- * - LSP: Implements ExpenseService contract faithfully
- * - ISP: ExpenseService interface is focused on expense operations only
- * - DIP: Depends on repository/mapper abstractions
- */
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class ExpenseServiceImpl implements ExpenseService {
+
+    private static final Logger log = LoggerFactory.getLogger(ExpenseServiceImpl.class);
 
     private final ExpenseRepository expenseRepository;
     private final UserRepository userRepository;
     private final ExpenseMapper expenseMapper;
+
+    @Autowired
+    public ExpenseServiceImpl(ExpenseRepository expenseRepository,
+                              UserRepository userRepository,
+                              ExpenseMapper expenseMapper) {
+        this.expenseRepository = expenseRepository;
+        this.userRepository = userRepository;
+        this.expenseMapper = expenseMapper;
+    }
 
     @Override
     @Transactional(readOnly = true)

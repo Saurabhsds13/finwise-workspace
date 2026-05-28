@@ -5,7 +5,7 @@ import com.finwise.dto.expense.ExpenseResponse;
 import com.finwise.security.SecurityUtils;
 import com.finwise.service.ExpenseService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +14,14 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/expenses")
-@RequiredArgsConstructor
 public class ExpenseController {
 
     private final ExpenseService expenseService;
+
+    @Autowired
+    public ExpenseController(ExpenseService expenseService) {
+        this.expenseService = expenseService;
+    }
 
     @GetMapping
     public ResponseEntity<List<ExpenseResponse>> getAll() {

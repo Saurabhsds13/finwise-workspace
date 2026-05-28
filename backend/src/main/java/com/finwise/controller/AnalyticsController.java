@@ -7,7 +7,7 @@ import com.finwise.entity.AiInsight;
 import com.finwise.security.SecurityUtils;
 import com.finwise.service.AnalyticsService;
 import com.finwise.service.AiAdvisorService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,11 +15,16 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/analytics")
-@RequiredArgsConstructor
 public class AnalyticsController {
 
     private final AnalyticsService analyticsService;
     private final AiAdvisorService aiAdvisorService;
+
+    @Autowired
+    public AnalyticsController(AnalyticsService analyticsService, AiAdvisorService aiAdvisorService) {
+        this.analyticsService = analyticsService;
+        this.aiAdvisorService = aiAdvisorService;
+    }
 
     @GetMapping("/spending")
     public ResponseEntity<SpendingOverview> getSpendingOverview(@RequestParam String period) {

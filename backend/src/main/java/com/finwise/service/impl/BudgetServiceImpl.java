@@ -10,8 +10,9 @@ import com.finwise.repository.BudgetRepository;
 import com.finwise.repository.ExpenseRepository;
 import com.finwise.repository.UserRepository;
 import com.finwise.service.BudgetService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,23 +22,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Budget service implementation.
- *
- * SOLID principles applied:
- * - SRP: Only handles budget business logic
- * - OCP: Budget period strategies can be extended without modification
- * - DIP: Depends on repository/mapper abstractions
- */
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class BudgetServiceImpl implements BudgetService {
+
+    private static final Logger log = LoggerFactory.getLogger(BudgetServiceImpl.class);
 
     private final BudgetRepository budgetRepository;
     private final ExpenseRepository expenseRepository;
     private final UserRepository userRepository;
     private final BudgetMapper budgetMapper;
+
+    @Autowired
+    public BudgetServiceImpl(BudgetRepository budgetRepository,
+                             ExpenseRepository expenseRepository,
+                             UserRepository userRepository,
+                             BudgetMapper budgetMapper) {
+        this.budgetRepository = budgetRepository;
+        this.expenseRepository = expenseRepository;
+        this.userRepository = userRepository;
+        this.budgetMapper = budgetMapper;
+    }
 
     @Override
     @Transactional(readOnly = true)
