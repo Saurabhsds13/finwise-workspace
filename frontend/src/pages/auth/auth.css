@@ -1,3 +1,198 @@
+/* ==========================================
+   SPLIT LAYOUT - Login Landing Page
+   ========================================== */
+
+.auth-landing {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Left Side - Landing Content */
+.landing-left {
+  flex: 1;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 32px 48px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.landing-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 48px;
+}
+
+.landing-logo {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.landing-nav-links {
+  display: flex;
+  gap: 24px;
+}
+
+.landing-nav-links a {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.landing-nav-links a:hover {
+  color: white;
+}
+
+.landing-hero {
+  margin-bottom: 48px;
+}
+
+.landing-hero h1 {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+
+.landing-hero .highlight {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.hero-subtitle {
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 480px;
+}
+
+/* Features */
+.landing-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.feature-item {
+  display: flex;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px;
+  backdrop-filter: blur(4px);
+}
+
+.feature-emoji {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.feature-item h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.feature-item p {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.4;
+}
+
+/* About */
+.landing-about {
+  margin-bottom: 32px;
+}
+
+.landing-about h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.landing-about p {
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 480px;
+}
+
+/* Contact */
+.landing-contact {
+  margin-bottom: 32px;
+}
+
+.landing-contact h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.contact-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.contact-chip {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Footer */
+.landing-footer {
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+.landing-footer p {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Right Side - Login Form */
+.landing-right {
+  width: 440px;
+  min-width: 440px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: var(--background);
+}
+
+@media (max-width: 900px) {
+  .auth-landing {
+    flex-direction: column;
+  }
+
+  .landing-left {
+    padding: 24px;
+  }
+
+  .landing-right {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .landing-features {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================
+   STANDARD AUTH PAGE (Register, Forgot)
+   ========================================== */
+
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -7,18 +202,29 @@
   padding: 20px;
 }
 
+/* ==========================================
+   AUTH CARD (shared)
+   ========================================== */
+
 .auth-card {
   background: var(--surface);
   border-radius: 16px;
-  padding: 40px;
+  padding: 36px;
   width: 100%;
-  max-width: 440px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  max-width: 380px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
 }
 
 .auth-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
+}
+
+.auth-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
 }
 
 .auth-logo {
@@ -36,7 +242,7 @@
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 
 .form-group {
@@ -52,7 +258,7 @@
 }
 
 .form-group input {
-  padding: 12px 14px;
+  padding: 11px 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   font-size: 14px;

@@ -16,6 +16,8 @@ import Goals from '../pages/goals/Goals';
 import Analytics from '../pages/analytics/Analytics';
 import AiAdvisor from '../pages/ai-advisor/AiAdvisor';
 import Settings from '../pages/settings/Settings';
+import About from '../pages/about/About';
+import Contact from '../pages/contact/Contact';
 
 function AppRoutes() {
   return (
@@ -40,6 +42,8 @@ function AppRoutes() {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/ai-advisor" element={<AiAdvisor />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
       </Route>
     </Routes>
   );
